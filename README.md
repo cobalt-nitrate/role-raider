@@ -1,15 +1,15 @@
 <!-- logo here -->
 
-> **⚠️ ApplyPilot** is the original open-source project, created by [Pickle-Pixel](https://github.com/Pickle-Pixel) and first published on GitHub on **February 17, 2026**. We are **not affiliated** with applypilot.app, useapplypilot.com, or any other product using the "ApplyPilot" name. These sites are **not associated with this project** and may misrepresent what they offer. If you're looking for the autonomous, open-source job application agent — you're in the right place.
+> **⚠️ Role Raider** is the original open-source project, created by [Pickle-Pixel](https://github.com/Pickle-Pixel) and first published on GitHub on **February 17, 2026**. We are **not affiliated** with role_raider.app, userole_raider.com, or any other product using the "Role Raider" name. These sites are **not associated with this project** and may misrepresent what they offer. If you're looking for the autonomous, open-source job application agent — you're in the right place.
 
-# ApplyPilot
+# Role Raider
 
 **Applied to 1,000 jobs in 2 days. Fully autonomous. Open source.**
 
-[![PyPI version](https://img.shields.io/pypi/v/applypilot?color=blue)](https://pypi.org/project/applypilot/)
+[![PyPI version](https://img.shields.io/pypi/v/role_raider?color=blue)](https://pypi.org/project/role_raider/)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green.svg)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/Pickle-Pixel/ApplyPilot?style=social)](https://github.com/Pickle-Pixel/ApplyPilot)
+[![GitHub stars](https://img.shields.io/github/stars/Pickle-Pixel/Role Raider?style=social)](https://github.com/cobalt-nitrate/role-raider)
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/S6S01UL5IO)
 
 
@@ -22,20 +22,20 @@ https://github.com/user-attachments/assets/7ee3417f-43d4-4245-9952-35df1e77f2df
 
 ## What It Does
 
-ApplyPilot is a 6-stage autonomous job application pipeline. It discovers jobs across 5+ boards, scores them against your resume with AI, tailors your resume per job, writes cover letters, and **submits applications for you**. It navigates forms, uploads documents, answers screening questions, all hands-free.
+Role Raider is a 6-stage autonomous job application pipeline. It discovers jobs across 5+ boards, scores them against your resume with AI, tailors your resume per job, writes cover letters, and **submits applications for you**. It navigates forms, uploads documents, answers screening questions, all hands-free.
 
 Three commands. That's it.
 
 ```bash
-pip install applypilot
+pip install role_raider
 pip install --no-deps python-jobspy && pip install pydantic tls-client requests markdownify regex
-applypilot init          # one-time setup: resume, profile, preferences, API keys
-applypilot doctor        # verify your setup — shows what's installed and what's missing
-applypilot run           # discover > enrich > score > tailor > cover letters
-applypilot run -w 4      # same but parallel (4 threads for discovery/enrichment)
-applypilot apply         # autonomous browser-driven submission
-applypilot apply -w 3    # parallel apply (3 Chrome instances)
-applypilot apply --dry-run  # fill forms without submitting
+role_raider init          # one-time setup: resume, profile, preferences, API keys
+role_raider doctor        # verify your setup — shows what's installed and what's missing
+role_raider run           # discover > enrich > score > tailor > cover letters
+role_raider run -w 4      # same but parallel (4 threads for discovery/enrichment)
+role_raider apply         # autonomous browser-driven submission
+role_raider apply -w 3    # parallel apply (3 Chrome instances)
+role_raider apply --dry-run  # fill forms without submitting
 ```
 
 > **Why two install commands?** `python-jobspy` pins an exact numpy version in its metadata that conflicts with pip's resolver, but works fine at runtime with any modern numpy. The `--no-deps` flag bypasses the resolver; the second command installs jobspy's actual runtime dependencies. Everything except `python-jobspy` installs normally.
@@ -47,7 +47,7 @@ applypilot apply --dry-run  # fill forms without submitting
 ### Full Pipeline (recommended)
 **Requires:** Python 3.11+, Node.js (for npx), Gemini API key (free), Claude Code CLI, Chrome
 
-Runs all 6 stages, from job discovery to autonomous application submission. This is the full power of ApplyPilot.
+Runs all 6 stages, from job discovery to autonomous application submission. This is the full power of Role Raider.
 
 ### Discovery + Tailoring Only
 **Requires:** Python 3.11+, Gemini API key (free)
@@ -71,9 +71,9 @@ Each stage is independent. Run them all or pick what you need.
 
 ---
 
-## ApplyPilot vs The Alternatives
+## Role Raider vs The Alternatives
 
-| Feature | ApplyPilot | AIHawk | Manual |
+| Feature | Role Raider | AIHawk | Manual |
 |---------|-----------|--------|--------|
 | Job discovery | 5 boards + Workday + direct sites | LinkedIn only | One board at a time |
 | AI scoring | 1-10 fit score per job | Basic filtering | Your gut feeling |
@@ -108,7 +108,7 @@ Each stage is independent. Run them all or pick what you need.
 
 ## Configuration
 
-All generated by `applypilot init`:
+All generated by `role_raider init`:
 
 ### `profile.json`
 Your personal data in one structured file: contact info, work authorization, compensation, experience, skills, resume facts (preserved during tailoring), and EEO defaults. Powers scoring, tailoring, and form auto-fill.
@@ -119,7 +119,7 @@ Job search queries, target titles, locations, boards. Run multiple searches with
 ### `.env`
 API keys and runtime config: `GEMINI_API_KEY`, `LLM_MODEL`, `CAPSOLVER_API_KEY` (optional).
 
-### Package configs (shipped with ApplyPilot)
+### Package configs (shipped with Role Raider)
 - `config/employers.yaml` - Workday employer registry (48 preconfigured)
 - `config/sites.yaml` - Direct career sites (30+), blocked sites, base URLs, manual ATS domains
 - `config/searches.example.yaml` - Example search configuration
@@ -150,10 +150,10 @@ The Playwright MCP server is configured automatically at runtime per worker. No 
 
 ```bash
 # Utility modes (no Chrome/Claude needed)
-applypilot apply --mark-applied URL    # manually mark a job as applied
-applypilot apply --mark-failed URL     # manually mark a job as failed
-applypilot apply --reset-failed        # reset all failed jobs for retry
-applypilot apply --gen --url URL       # generate prompt file for manual debugging
+role_raider apply --mark-applied URL    # manually mark a job as applied
+role_raider apply --mark-failed URL     # manually mark a job as failed
+role_raider apply --reset-failed        # reset all failed jobs for retry
+role_raider apply --gen --url URL       # generate prompt file for manual debugging
 ```
 
 ---
@@ -161,23 +161,23 @@ applypilot apply --gen --url URL       # generate prompt file for manual debuggi
 ## CLI Reference
 
 ```
-applypilot init                         # First-time setup wizard
-applypilot doctor                       # Verify setup, diagnose missing requirements
-applypilot run [stages...]              # Run pipeline stages (or 'all')
-applypilot run --workers 4              # Parallel discovery/enrichment
-applypilot run --stream                 # Concurrent stages (streaming mode)
-applypilot run --min-score 8            # Override score threshold
-applypilot run --dry-run                # Preview without executing
-applypilot run --validation lenient     # Relax validation (recommended for Gemini free tier)
-applypilot run --validation strict      # Strictest validation (retries on any banned word)
-applypilot apply                        # Launch auto-apply
-applypilot apply --workers 3            # Parallel browser workers
-applypilot apply --dry-run              # Fill forms without submitting
-applypilot apply --continuous           # Run forever, polling for new jobs
-applypilot apply --headless             # Headless browser mode
-applypilot apply --url URL              # Apply to a specific job
-applypilot status                       # Pipeline statistics
-applypilot dashboard                    # Open HTML results dashboard
+role_raider init                         # First-time setup wizard
+role_raider doctor                       # Verify setup, diagnose missing requirements
+role_raider run [stages...]              # Run pipeline stages (or 'all')
+role_raider run --workers 4              # Parallel discovery/enrichment
+role_raider run --stream                 # Concurrent stages (streaming mode)
+role_raider run --min-score 8            # Override score threshold
+role_raider run --dry-run                # Preview without executing
+role_raider run --validation lenient     # Relax validation (recommended for Gemini free tier)
+role_raider run --validation strict      # Strictest validation (retries on any banned word)
+role_raider apply                        # Launch auto-apply
+role_raider apply --workers 3            # Parallel browser workers
+role_raider apply --dry-run              # Fill forms without submitting
+role_raider apply --continuous           # Run forever, polling for new jobs
+role_raider apply --headless             # Headless browser mode
+role_raider apply --url URL              # Apply to a specific job
+role_raider status                       # Pipeline statistics
+role_raider dashboard                    # Open HTML results dashboard
 ```
 
 ---
@@ -190,6 +190,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding standards, 
 
 ## License
 
-ApplyPilot is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+Role Raider is licensed under the [GNU Affero General Public License v3.0](LICENSE).
 
 You are free to use, modify, and distribute this software. If you deploy a modified version as a service, you must release your source code under the same license.
