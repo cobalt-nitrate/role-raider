@@ -1,6 +1,6 @@
 <!-- logo here -->
 
-> **⚠️ Role Raider** is the original open-source project, created by [Pickle-Pixel](https://github.com/Pickle-Pixel) and first published on GitHub on **February 17, 2026**. We are **not affiliated** with role_raider.app, userole_raider.com, or any other product using the "Role Raider" name. These sites are **not associated with this project** and may misrepresent what they offer. If you're looking for the autonomous, open-source job application agent — you're in the right place.
+> **Role Raider** is maintained by [cobalt-nitrate](https://github.com/cobalt-nitrate). This project is a fork of the open-source [ApplyPilot](https://github.com/Pickle-Pixel/ApplyPilot) project originally created by [Pickle-Pixel](https://github.com/Pickle-Pixel) — full credit to them for the foundation. We took that base and used [Claude Code](https://claude.ai/code) to tweak, enhance, and evolve the codebase for improved usability and scalability.
 
 # Role Raider
 
