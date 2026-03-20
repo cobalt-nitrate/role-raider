@@ -2,10 +2,17 @@ import { useStats } from '../hooks/useStats'
 import StatCard from '../components/ui/StatCard'
 
 export default function Dashboard() {
-  const { stats, loading } = useStats()
+  const { stats, loading, backendDown } = useStats()
 
   if (loading) return <div className="p-8 text-slate-500">Loading...</div>
-  if (!stats) return <div className="p-8 text-red-400">Could not reach backend. Is it running?</div>
+  if (backendDown || !stats) return (
+    <div className="p-8">
+      <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-6 text-red-400 text-sm space-y-1">
+        <div className="font-semibold">Cannot reach backend</div>
+        <div className="text-red-500/70">Make sure it's running: <code className="font-mono">cd web/backend && python3 -m uvicorn main:app --reload</code></div>
+      </div>
+    </div>
+  )
 
   return (
     <div className="p-8 space-y-8">

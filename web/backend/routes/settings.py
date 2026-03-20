@@ -131,6 +131,23 @@ async def put_resume(file: UploadFile = File(...)):
     return {"ok": True}
 
 
+@router.put("/resume-text")
+def put_resume_text(body: dict):
+    content = body.get("content", "")
+    if not content.strip():
+        raise HTTPException(status_code=400, detail="Resume content is empty")
+    RESUME_PATH.write_text(content, encoding="utf-8")
+    return {"ok": True}
+
+
+@router.get("/resume-full")
+def get_resume_full():
+    if not RESUME_PATH.exists():
+        return {"exists": False, "content": ""}
+    text = RESUME_PATH.read_text(encoding="utf-8")
+    return {"exists": True, "content": text}
+
+
 @router.get("/doctor")
 def doctor():
     load_env()
