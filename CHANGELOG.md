@@ -22,9 +22,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dry-run toggle, Run/Stop buttons with live log output
 - **Auto-Apply UI** — all apply options exposed (limit, workers, model, headless,
   dry-run, continuous, target URL); dry-run on by default for safety
-- **Settings page** — API key manager (Gemini, OpenAI, NVIDIA NIM, CapSolver),
-  searches.yaml editor, Doctor health check panel
-- **NVIDIA NIM support hint** — Settings page documents using NVIDIA's free
+- **Settings page — full onboarding** — five-tab interface covering everything needed
+  to start the pipeline from scratch:
+  - *Profile* — structured form with sections for personal info, work authorization,
+    compensation, target role & experience, skills (tag input), resume facts, EEO
+    defaults, and availability; saved to `profile.json`
+  - *Resume* — paste full resume text directly in the browser; saved to `resume.txt`
+    via new `PUT /settings/resume-text` endpoint
+  - *Job Searches* — YAML editor for `searches.yaml` with live validation
+  - *API Keys* — env var manager for Gemini, OpenAI, LLM_URL/LLM_MODEL, CapSolver,
+    Chrome Path; includes step-by-step NVIDIA NIM free-tier setup guide
+  - *Doctor* — tier indicator and health check panel
+- **`GET /settings/resume-full`** — new endpoint returns full resume text for the
+  Resume tab editor
+- **`PUT /settings/resume-text`** — new endpoint accepts plain text body and writes
+  directly to `resume.txt`, avoiding binary file-upload friction
+- **NVIDIA NIM support** — Settings page documents using NVIDIA's free
   OpenAI-compatible API (`integrate.api.nvidia.com/v1`) as an alternative to Gemini
 - **Task manager** — in-process subprocess registry with log buffering, SSE replay
   from any offset, and automatic eviction after 10 minutes

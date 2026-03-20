@@ -378,6 +378,22 @@ def doctor() -> None:
         results.append(("python-jobspy", warn_mark,
                         "pip install --no-deps python-jobspy && pip install pydantic tls-client requests markdownify regex"))
 
+    # playwright-stealth (browser fingerprint spoofing for enrichment)
+    try:
+        import playwright_stealth  # noqa: F401
+        results.append(("playwright-stealth", ok_mark, "Browser fingerprint spoofing active — reduces blocks during enrichment"))
+    except ImportError:
+        results.append(("playwright-stealth", warn_mark,
+                        "pip install playwright-stealth  (reduces bot-detection blocks during enrichment)"))
+
+    # weasyprint (lightweight PDF generation)
+    try:
+        import weasyprint  # noqa: F401
+        results.append(("weasyprint", ok_mark, "Lightweight PDF generation active (no Chrome needed for PDFs)"))
+    except ImportError:
+        results.append(("weasyprint", warn_mark,
+                        "pip install weasyprint  (PDF generation without Chrome — fallback to Playwright if missing)"))
+
     # --- Tier 2 checks ---
     import os
     has_gemini = bool(os.environ.get("GEMINI_API_KEY"))

@@ -9,6 +9,12 @@ from pathlib import Path
 
 from role_raider.config import TAILORED_DIR
 
+try:
+    from weasyprint import HTML as _WeasyHTML
+    _HAS_WEASYPRINT = True
+except ImportError:
+    _HAS_WEASYPRINT = False
+
 log = logging.getLogger(__name__)
 
 
@@ -334,12 +340,24 @@ li {{
 # ── PDF Renderer ─────────────────────────────────────────────────────────
 
 def render_pdf(html: str, output_path: str) -> None:
-    """Render HTML to PDF using Playwright's headless Chromium.
+    """Render HTML to PDF.
+
+    Uses WeasyPrint when available (lightweight, no Chrome required).
+    Falls back to Playwright headless Chromium if WeasyPrint is not installed.
 
     Args:
         html: Complete HTML string.
         output_path: Path to write the PDF file.
     """
+    if _HAS_WEASYPRINT:
+        _WeasyHTML(string=html).write_pdf(output_path)
+        return
+
+    # Fallback: Playwright headless Chromium
+    log.warning(
+        "WeasyPrint not installed — falling back to Playwright for PDF generation. "
+        "Run: pip install weasyprint"
+    )
     from playwright.sync_api import sync_playwright
 
     with sync_playwright() as p:

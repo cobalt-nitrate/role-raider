@@ -22,6 +22,15 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 
+try:
+    from playwright_stealth import Stealth as _Stealth
+    _stealth = _Stealth()
+    def _stealth_sync(page) -> None:  # noqa: E301
+        _stealth.apply_stealth_sync(page)
+except ImportError:
+    def _stealth_sync(page) -> None:  # noqa: E301
+        pass
+
 from role_raider import config
 from role_raider.config import DB_PATH
 from role_raider.database import get_connection, init_db, ensure_columns
@@ -146,6 +155,7 @@ def resolve_wttj_urls(conn: sqlite3.Connection) -> int:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page(user_agent=UA)
+        _stealth_sync(page)
         page.on("response", capture_algolia)
         page.goto(
             "https://www.welcometothejungle.com/en/jobs?query=developer&refinementList%5Bremote%5D%5B%5D=fulltime",
@@ -639,6 +649,7 @@ def scrape_site_batch(
             browser = p.chromium.launch(**launch_opts)
             context = browser.new_context(user_agent=UA)
             page = context.new_page()
+            _stealth_sync(page)
 
             for i, (url, title) in enumerate(jobs):
                 log.info("[%d/%d] %s", i + 1, len(jobs), title[:50] if title else url[:50])
