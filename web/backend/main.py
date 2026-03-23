@@ -1,8 +1,14 @@
 """Role Raider — FastAPI backend."""
 
+import os
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
+
+# Point all data files (profile, resume, .env, DB) at the project root
+# so they're visible in the repo instead of ~/.role_raider/
+_PROJECT_ROOT = Path(__file__).parent.parent.parent
+os.environ.setdefault("ROLE_RAIDER_DIR", str(_PROJECT_ROOT))
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 

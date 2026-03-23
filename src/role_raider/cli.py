@@ -142,6 +142,139 @@ def run(
         raise typer.Exit(code=1)
 
 
+@app.command(name="dry-run")
+def dry_run_cmd(
+    stages: Optional[list[str]] = typer.Argument(
+        None,
+        help=(
+            "Pipeline stages to run before preview. "
+            f"Valid: {', '.join(VALID_STAGES)}, all. Defaults to 'all'."
+        ),
+    ),
+    min_score: int = typer.Option(7, "--min-score", help="Minimum fit score for tailor/cover."),
+    limit: int = typer.Option(10, "--limit", "-l", help="Max jobs to generate apply prompts for."),
+    workers: int = typer.Option(1, "--workers", "-w", help="Parallel threads for enrichment."),
+    validation: str = typer.Option(
+        "lenient",
+        "--validation",
+        help="Validation mode: strict | normal | lenient. Defaults to lenient for speed.",
+    ),
+    skip_pipeline: bool = typer.Option(
+        False, "--skip-pipeline", help="Skip running the pipeline — preview jobs already in DB."
+    ),
+) -> None:
+    """Run the full pipeline then preview apply prompts without any browser or submission.
+
+    Runs all pipeline stages (discover -> enrich -> score -> tailor -> cover -> pdf),
+    then generates a prompt file for each ready job showing exactly what would be
+    submitted to the ATS. No Chrome, no Claude Code CLI, no form-filling.
+
+    Use this to validate the full pipeline end-to-end with a real profile before
+    committing to live applications.
+    """
+    _bootstrap()
+
+    from role_raider.config import APP_DIR
+    from role_raider.database import get_connection
+
+    stage_list = stages if stages else ["all"]
+
+    for s in stage_list:
+        if s != "all" and s not in VALID_STAGES:
+            console.print(
+                f"[red]Unknown stage:[/red] '{s}'. "
+                f"Valid: {', '.join(VALID_STAGES)}, all"
+            )
+            raise typer.Exit(code=1)
+
+    valid_modes = ("strict", "normal", "lenient")
+    if validation not in valid_modes:
+        console.print(f"[red]Invalid --validation:[/red] '{validation}'. Choose: {', '.join(valid_modes)}")
+        raise typer.Exit(code=1)
+
+    console.print("\n[bold blue]Dry Run[/bold blue] — pipeline + prompt preview, no submission\n")
+
+    # ── Step 1: Run the pipeline ──────────────────────────────────────────
+    if not skip_pipeline:
+        llm_stages = {"score", "tailor", "cover"}
+        if any(s in stage_list for s in llm_stages) or "all" in stage_list:
+            from role_raider.config import check_tier
+            check_tier(2, "dry-run (score/tailor stages require an LLM API key)")
+
+        from role_raider.pipeline import run_pipeline
+        run_pipeline(
+            stages=stage_list,
+            min_score=min_score,
+            workers=workers,
+            validation_mode=validation,
+        )
+    else:
+        console.print("[dim]  --skip-pipeline set — using jobs already in DB.[/dim]\n")
+
+    # ── Step 2: Query ready jobs ──────────────────────────────────────────
+    conn = get_connection()
+    rows = conn.execute("""
+        SELECT url, title, company, site, fit_score, tailored_resume_path, cover_letter_path
+        FROM jobs
+        WHERE tailored_resume_path IS NOT NULL
+          AND COALESCE(apply_status, '') NOT IN ('applied')
+        ORDER BY fit_score DESC
+        LIMIT ?
+    """, (limit,)).fetchall()
+
+    if not rows:
+        console.print("[yellow]No jobs ready for preview.[/yellow]")
+        console.print("Run [bold]role-raider run score tailor[/bold] first.")
+        return
+
+    # ── Step 3: Generate prompt files ────────────────────────────────────
+    from role_raider.apply.launcher import gen_prompt
+
+    console.print(f"[bold]Generating apply prompts for {len(rows)} job(s)...[/bold]\n")
+
+    preview_table = Table(
+        title="Dry Run Preview — Jobs Ready to Apply",
+        show_header=True,
+        header_style="bold cyan",
+        show_lines=False,
+    )
+    preview_table.add_column("Score", justify="center", width=6)
+    preview_table.add_column("Title", style="bold", max_width=38)
+    preview_table.add_column("Company", max_width=22)
+    preview_table.add_column("Site", max_width=12)
+    preview_table.add_column("Resume", justify="center", width=7)
+    preview_table.add_column("Cover", justify="center", width=7)
+    preview_table.add_column("Prompt", style="dim", max_width=28)
+
+    generated = 0
+    for url, title, company, site, score, resume_path, cl_path in rows:
+        prompt_file = gen_prompt(url, min_score=0)
+        has_resume = "[green]yes[/green]" if resume_path else "[red]no[/red]"
+        has_cover = "[green]yes[/green]" if cl_path else "[dim]no[/dim]"
+        prompt_name = prompt_file.name if prompt_file else "[red]failed[/red]"
+        if prompt_file:
+            generated += 1
+        preview_table.add_row(
+            f"[{'green' if (score or 0) >= 8 else 'yellow'}]{score or '-'}[/]",
+            (title or "")[:38],
+            (company or "")[:22],
+            (site or "")[:12],
+            has_resume,
+            has_cover,
+            prompt_name,
+        )
+
+    console.print(preview_table)
+
+    log_dir = APP_DIR / "logs"
+    console.print(f"\n[green]Dry run complete.[/green] {generated}/{len(rows)} prompt files generated.")
+    console.print(f"Prompt files saved to: [bold]{log_dir}[/bold]")
+    console.print()
+    console.print("[dim]Next steps:[/dim]")
+    console.print("  [bold]role-raider apply --dry-run[/bold]   run the agent without clicking Submit (needs Tier 3)")
+    console.print("  [bold]role-raider apply[/bold]             submit live applications (needs Tier 3)\n")
+
+
 @app.command()
 def apply(
     limit: Optional[int] = typer.Option(None, "--limit", "-l", help="Max applications to submit."),
